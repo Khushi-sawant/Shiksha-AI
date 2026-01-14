@@ -1,0 +1,13 @@
+# Environment variables (secrets)
+.env
+
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# Django
+db.sqlite3
+
+# OS files
+.DS_Store

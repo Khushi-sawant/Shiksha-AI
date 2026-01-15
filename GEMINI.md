@@ -36,7 +36,9 @@ The project uses a custom user model and is configured to use a SQLite database.
     pip install -r requirements.txt
     ```
 
-    *TODO: A `requirements.txt` file needs to be generated. For now, you can install the dependencies listed in the `venv/Lib/site-packages` directory or by inspecting the code for imports.*
+```bash
+python scripts/_sample_data.py
+```
 
 4.  **Create a `.env` file** in the project root and add the following, replacing the placeholder values:
 

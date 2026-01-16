@@ -71,6 +71,7 @@ LOCAL_APPS = [
     'users',
     'skills',
     'core',
+    'assessment',
 ]
 
 INSTALLED_APPS = DEFAULT_APPS + LOCAL_APPS
@@ -129,3 +130,12 @@ CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
+
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = env.bool('DEBUG', default=False)
+  
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1'])
+  
+  # CSRF
+CSRF_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_SECURE = not DEBUG

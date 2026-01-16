@@ -13,3 +13,7 @@ db.sqlite3
 .DS_Store
 firebase.json
 .firebaserc
+
+venv/*.pyc__pycache__/
+.envdb.sqlite3*
+.logstaticfiles/media/

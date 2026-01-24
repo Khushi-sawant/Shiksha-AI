@@ -4,10 +4,12 @@ import environ
 import firebase_admin
 from firebase_admin import credentials, firestore
 
+
 # ==============================
 # BASE DIR
 # ==============================
 BASE_DIR = Path(__file__).resolve().parent.parent
+
 
 env = environ.Env(
     DEBUG=(bool, False)
@@ -71,6 +73,8 @@ LOCAL_APPS = [
     'skills',
     'core',
     'assessment',
+     'learning'
+    
 ]
 
 INSTALLED_APPS = DEFAULT_APPS + LOCAL_APPS
@@ -139,14 +143,12 @@ ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1'])
 CSRF_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_SECURE = not DEBUG
 
-GEMINI_API_KEY = "AIzaSyCIqyznPWm3Q8ag2rOEDieNvFIjqHpBvfs"
+GEMINI_API_KEY = "AIzaSyDx8rFtL60yyKtoH9jmFUWHZhBziC7ovWA"
 
 
 GEMINI_MODEL_LITE = "models/gemini-pro"
 GEMINI_MODEL_FLASH = "models/gemini-pro"
 GEMINI_MODEL_PRO = "models/gemini-pro"
-
-
 
 # =========================
 # IRT Configuration
@@ -154,4 +156,3 @@ GEMINI_MODEL_PRO = "models/gemini-pro"
 
 IRT_CONVERGENCE_THRESHOLD = 0.3
 IRT_MAX_QUESTIONS = 30
-

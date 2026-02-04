@@ -1,107 +1,145 @@
+from google import genai
+from django.conf import settings
+
+class GeminiService:
+    def __init__(self):
+        self.client = genai.Client(api_key=settings.GEMINI_API_KEY)
+
+    def generate(self, prompt: str):
+        response = self.client.models.generate_content(
+            model="models/gemini-1.5-flash",  # ✅ THIS IS THE FIX
+            contents=prompt,
+        )
+        return response.text
+    
+import google.genai as genai
 import json
 import time
-import re
-from typing import Dict, Optional
+from typing import Dict, List, Optional
+  
+class GeminiService:
+      """Service for interacting with Google Gemini API."""
+      
+      def __init__(self):
+          genai.configure(api_key=settings.GEMINI_API_KEY)
+      
+      def generate_with_lite(self, prompt: str, **kwargs) -> str:
+          """Generate content using Flash-Lite (cheapest, fastest)."""
+          model = genai.GenerativeModel(settings.GEMINI_MODEL_LITE)
+          response = model.generate_content(prompt, **kwargs)
+          return response.text
+      
+      def generate_with_flash(self, prompt: str, **kwargs) -> str:
+          """Generate content using Flash (balanced)."""
+          model = genai.GenerativeModel(settings.GEMINI_MODEL_FLASH)
+          response = model.generate_content(prompt, **kwargs)
+          return response.text
+      
+      def generate_with_pro(self, prompt: str, **kwargs) -> str:
+          """Generate content using Pro (most capable)."""
+          model = genai.GenerativeModel(settings.GEMINI_MODEL_PRO)
+          response = model.generate_content(prompt, **kwargs)
+          return response.text
+      
+def generate_with_retry(self, prompt: str, model_type='flash', 
+                         max_retries=3, **kwargs) -> str:
+      """Generate with automatic retry on failure."""
+      for attempt in range(max_retries):
+          try:
+              if model_type == 'lite':
+                  return self.generate_with_lite(prompt, **kwargs)
+              elif model_type == 'flash':
+                  return self.generate_with_flash(prompt, **kwargs)
+              elif model_type == 'pro':
+                  return self.generate_with_pro(prompt, **kwargs)
+          except Exception as e:
+              if attempt == max_retries - 1:
+                  raise
+              wait_time = 2 ** attempt  # Exponential backoff
+              time.sleep(wait_time)
+      
+      raise Exception("Failed after max retries")
 
-import google.generativeai as genai
+def parse_json_response(self, response_text: str) -> Dict:
+      """Parse JSON from Gemini response, handling code blocks."""
+      # Remove markdown code blocks if present
+      text = response_text.strip()
+      if text.startswith('```json'):
+          text = text[7:]  # Remove ```json
+      if text.startswith('```'):
+          text = text[3:]  # Remove ```
+      if text.endswith('```'):
+          text = text[:-3]  # Remove closing ```
+      
+      text = text.strip()
+      
+      try:
+          return json.loads(text)
+      except json.JSONDecodeError as e:
+          # Try to extract JSON from text
+          import re
+          json_match = re.search(r'\{.*\}', text, re.DOTALL)
+          if json_match:
+              return json.loads(json_match.group())
+          raise ValueError(f"Could not parse JSON: {e}")
+      
+
+      import json
+import time
 from django.conf import settings
+from google import genai
 
 
 class GeminiService:
     """
-    Service for interacting with Google Gemini API.
-    Supports Lite, Flash, Pro models with retry & JSON parsing helpers.
+    Wrapper around Google Gemini (google.genai SDK)
     """
 
     def __init__(self):
-        genai.configure(api_key=settings.GEMINI_API_KEY)
-
-    # -----------------------------
-    # Model Generators
-    # -----------------------------
-
-    def generate_with_lite(self, prompt: str, **kwargs) -> Optional[str]:
-        """Generate content using Flash-Lite (cheapest, fastest)."""
-        model = genai.GenerativeModel(settings.GEMINI_MODEL_LITE)
-        response = model.generate_content(prompt, **kwargs)
-        return response.text if response else None
-
-    def generate_with_flash(self, prompt: str, **kwargs) -> Optional[str]:
-        """Generate content using Flash (balanced)."""
-        model = genai.GenerativeModel(settings.GEMINI_MODEL_FLASH)
-        response = model.generate_content(prompt, **kwargs)
-        return response.text if response else None
-
-    def generate_with_pro(self, prompt: str, **kwargs) -> Optional[str]:
-        """Generate content using Pro (most capable)."""
-        model = genai.GenerativeModel(settings.GEMINI_MODEL_PRO)
-        response = model.generate_content(prompt, **kwargs)
-        return response.text if response else None
-
-    # -----------------------------
-    # Retry Logic (Exponential Backoff)
-    # -----------------------------
+        # ✅ CORRECT way for new SDK
+        self.client = genai.Client(
+            api_key=settings.GEMINI_API_KEY
+        )
 
     def generate_with_retry(
         self,
         prompt: str,
-        model_type: str = "flash",
-        max_retries: int = 3,
-        **kwargs
-    ) -> Optional[str]:
-        """Generate with automatic retry on failure."""
+        model_type: str = "lite",
+        retries: int = 3,
+        delay: int = 2
+    ) -> str:
 
-        for attempt in range(max_retries):
+        model_map = {
+            "lite": settings.GEMINI_MODEL_LITE,
+            "flash": settings.GEMINI_MODEL_FLASH,
+            "pro": settings.GEMINI_MODEL_PRO,
+        }
+
+        model_name = model_map.get(model_type)
+        if not model_name:
+            raise ValueError(f"Invalid model_type: {model_type}")
+
+        for attempt in range(retries):
             try:
-                if model_type == "lite":
-                    return self.generate_with_lite(prompt, **kwargs)
-                elif model_type == "flash":
-                    return self.generate_with_flash(prompt, **kwargs)
-                elif model_type == "pro":
-                    return self.generate_with_pro(prompt, **kwargs)
-                else:
-                    raise ValueError(f"Invalid model_type: {model_type}")
+                response = self.client.models.generate_content(
+                    model=model_name,
+                    contents=prompt
+                )
+                return response.text
 
             except Exception as e:
-                if attempt == max_retries - 1:
-                    raise e
+                if attempt == retries - 1:
+                    raise
+                time.sleep(delay)
 
-                wait_time = 2 ** attempt  # 1s, 2s, 4s...
-                time.sleep(wait_time)
-
-        raise RuntimeError("Failed after maximum retries")
-
-    # -----------------------------
-    # JSON Parsing Helper
-    # -----------------------------
-
-    def parse_json_response(self, response_text: str) -> Dict:
+    @staticmethod
+    def parse_json_response(text: str) -> dict:
         """
-        Parse JSON from Gemini response, handling markdown/code blocks.
+        Safely extract JSON from Gemini response
         """
-
-        if not response_text:
-            raise ValueError("Empty response text")
-
-        text = response_text.strip()
-
-        # Remove markdown code fences
-        if text.startswith("```json"):
-            text = text[7:]
-        elif text.startswith("```"):
-            text = text[3:]
-
-        if text.endswith("```"):
-            text = text[:-3]
-
-        text = text.strip()
-
         try:
-            return json.loads(text)
-        except json.JSONDecodeError:
-            # Fallback: extract JSON from text
-            json_match = re.search(r"\{.*\}", text, re.DOTALL)
-            if json_match:
-                return json.loads(json_match.group())
-
-        raise ValueError("Could not parse JSON from Gemini response")
+            start = text.index("{")
+            end = text.rindex("}") + 1
+            return json.loads(text[start:end])
+        except Exception as e:
+            raise ValueError(f"Invalid JSON from Gemini: {e}")

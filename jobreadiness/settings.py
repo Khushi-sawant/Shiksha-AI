@@ -10,7 +10,6 @@ from firebase_admin import credentials, firestore
 # ==============================
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 env = environ.Env(
     DEBUG=(bool, False)
 )
@@ -73,8 +72,13 @@ LOCAL_APPS = [
     'skills',
     'core',
     'assessment',
-     'learning'
-    
+    'learning',
+    'interview',
+    'gamification',
+    'subscriptions',
+    'billing',
+     'Referral',
+     
 ]
 
 INSTALLED_APPS = DEFAULT_APPS + LOCAL_APPS
@@ -143,7 +147,7 @@ ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1'])
 CSRF_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_SECURE = not DEBUG
 
-GEMINI_API_KEY = "AIzaSyDx8rFtL60yyKtoH9jmFUWHZhBziC7ovWA"
+GEMINI_API_KEY = "AIzaSyC8OLmeXXgM1sQlSIiP4buBw7AP9iwu8jQ"
 
 
 GEMINI_MODEL_LITE = "models/gemini-pro"

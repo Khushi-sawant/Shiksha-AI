@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from .models import DiagnosticSession, QuestionBank, AnswerLog
+from django.contrib.auth.models import User
+
   
 class QuestionBankSerializer(serializers.ModelSerializer):
       class Meta:
@@ -20,3 +22,14 @@ class DiagnosticSessionSerializer(serializers.ModelSerializer):
 class AnswerSubmitSerializer(serializers.Serializer):
       question_id = serializers.IntegerField()
       user_answer = serializers.IntegerField(min_value=0, max_value=3)
+
+
+class RegisterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'password']
+        extra_kwargs = {'password': {'write_only': True}}
+
+    def create(self, validated_data):
+        user = User.objects.create_user(**validated_data)
+        return user

@@ -68,7 +68,7 @@ TEMPLATES = [
 
 
 LOCAL_APPS = [
-    'users',
+   'users',
     'skills',
     'core',
     'assessment',
@@ -77,13 +77,28 @@ LOCAL_APPS = [
     'gamification',
     'subscriptions',
     'billing',
-     'Referral',
-     
+    'Referral',
+    'rest_framework',  
+    'accounts',
+    
+    
+
 ]
 
 INSTALLED_APPS = DEFAULT_APPS + LOCAL_APPS
 
 AUTH_USER_MODEL = 'users.User'
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.AllowAny',
+    ),
+}
+
 
 # ==============================
 # MIDDLEWARE
@@ -160,3 +175,9 @@ GEMINI_MODEL_PRO = "models/gemini-pro"
 
 IRT_CONVERGENCE_THRESHOLD = 0.3
 IRT_MAX_QUESTIONS = 30
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}

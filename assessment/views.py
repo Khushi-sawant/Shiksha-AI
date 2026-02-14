@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from .models import DiagnosticSession
 from .services import AssessmentService
 from .serializers import *
+
   
 class AssessmentViewSet(viewsets.ViewSet):
       """Diagnostic assessment endpoints."""
@@ -98,3 +99,11 @@ class AssessmentViewSet(ViewSet):
 
         serializer = SkillGapSerializer(gaps, many=True)
         return Response(serializer.data)
+    
+from rest_framework import generics
+from django.contrib.auth.models import User
+from .serializers import RegisterSerializer
+
+class RegisterView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = RegisterSerializer
